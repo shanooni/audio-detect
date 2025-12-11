@@ -14,10 +14,10 @@ import numpy as np
     
 #     return np.argmax(final_probs, axis=1)
 
-def ensemble_predict(X_test, X_test_cnn, ml_models, cnn_model, weights):
-    ml_probs = [model.predict_proba(X_test) for model in ml_models.values()]
-    cnn_probs = cnn_model.predict(X_test_cnn)
-    
+def ensemble_predict(flat_features, deep_features, ml_models, cnn_model, weights):
+    ml_probs = [model.predict_proba(flat_features) for model in ml_models.values()]
+    cnn_probs = cnn_model.predict(deep_features)
+
     final_probs = (
         weights['svm'] * ml_probs[0] +
         weights['rf'] * ml_probs[1] +
