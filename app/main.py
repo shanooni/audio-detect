@@ -6,7 +6,7 @@ from sklearn.preprocessing import LabelEncoder
 import sys
 import os
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
-from utils.feature_extractor import extract_features
+from utils.feature_extractor import extract_wav2vec2_features
 from utils.data_loader import load_audio_files, prepare_data
 from utils.model_builder import train_ml_models, train_cnn_model
 from utils.model_trainer import ensemble_predict
@@ -16,7 +16,7 @@ from visualizer import visualizer
 
 def run_pipeline(data_dir):
     audio_data, labels = load_audio_files(data_dir)
-    features = extract_features(audio_data)
+    features = extract_wav2vec2_features(audio_data)
     label_encoder = LabelEncoder()
     encoded_labels = label_encoder.fit_transform(labels)
     feature_reshape = np.array(features).reshape(-1, 24, 32, 1)
