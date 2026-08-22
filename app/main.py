@@ -16,11 +16,20 @@ from visualizer import visualizer
 
 def run_pipeline(data_dir):
     audio_data, labels = load_audio_files(data_dir)
-    features = extract_wav2vec2_features(audio_data)
+    features, kept_indices = extract_wav2vec2_features(audio_data)
+    labels = np.array(labels)[kept_indices]
+
     label_encoder = LabelEncoder()
     encoded_labels = label_encoder.fit_transform(labels)
     feature_reshape = np.array(features).reshape(-1, 24, 32, 1)
-    X_train, X_test, y_train, y_test = train_test_split(feature_reshape, encoded_labels, test_size=0.2, random_state=42,  stratify = labels)
+    
+    X_train, X_test, y_train, y_test = train_test_split(
+        feature_reshape,
+        encoded_labels,
+        test_size=0.2,
+        random_state=42,
+        stratify=encoded_labels  # stratify must match what's being split
+    )
 
     # Classical models
     X_train_flat = X_train.reshape(X_train.shape[0], -1)
@@ -46,11 +55,11 @@ def run_pipeline(data_dir):
     ensemble_preds = ensemble_predict(X_test_flat, X_test, ml_models, cnn_model, weights)
 
     metrics = evaluate_performance(y_test, ensemble_preds)
-    visualizer.plot_metrics(metrics, save_path="plots/metrics_plot.png")
+    visualizer.plot_metrics(metrics, save_path="plots/metrics_plot-v2.png")
     class_names = ['real', 'fake']
-    visualizer.plot_confusion_matrix(metrics["confusion_matrix"], class_labels=class_names, save_path="plots/conf_matrix.png")
+    visualizer.plot_confusion_matrix(metrics["confusion_matrix"], class_labels=class_names, save_path="plots/conf_matrix-v2.png")
 
 
 # ---- Run ----
 if __name__ == "__main__":
-    run_pipeline("/Users/shanoonissaka/Documents/school/thesis-project/datasets/audio/training")  # Change to your audio training directory
+    run_pipeline("/Users/shanoonissaka/Document/master-thesis/audio-detect/data/audio-data/for-norm/for-norm/training")  # Change to your audio training directory
