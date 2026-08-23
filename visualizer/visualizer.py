@@ -30,3 +30,23 @@ def plot_confusion_matrix(cm, class_labels=None, save_path="confusion_matrix.png
     # Save and Show
     plt.savefig(save_path, format=os.path.splitext(save_path)[-1][1:])
     plt.show()
+
+def plot_training_history(history, save_path="plots/training_history.png"):
+    os.makedirs(os.path.dirname(save_path), exist_ok=True)
+    fig, axes = plt.subplots(1, 2, figsize=(12, 5))
+
+    axes[0].plot(history.history['loss'], label='Train Loss')
+    axes[0].plot(history.history['val_loss'], label='Val Loss')
+    axes[0].set_title('Loss over Epochs')
+    axes[0].set_xlabel('Epoch')
+    axes[0].legend()
+
+    axes[1].plot(history.history['accuracy'], label='Train Accuracy')
+    axes[1].plot(history.history['val_accuracy'], label='Val Accuracy')
+    axes[1].set_title('Accuracy over Epochs')
+    axes[1].set_xlabel('Epoch')
+    axes[1].legend()
+
+    plt.tight_layout()
+    plt.savefig(save_path, dpi=100)
+    plt.close()

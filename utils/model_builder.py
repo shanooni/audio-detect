@@ -1,5 +1,6 @@
 import numpy as np
 import tensorflow as tf
+import pandas as pd
 from keras.models import Sequential
 from keras.layers import Conv2D, MaxPooling2D, Flatten, Dense, Dropout, BatchNormalization
 from keras.callbacks import EarlyStopping, ModelCheckpoint
@@ -54,6 +55,11 @@ def train_cnn_model(X_train, y_train, X_val, y_val, input_shape, num_classes, sa
     model.save("models/cnn_model.h5")
     model.save("models/cnn_model.keras")
     plot_model(model,to_file="plots/cnn_model_architecture.png", show_layer_names=True,expand_nested=True,dpi=100)
+
+    best_epoch = int(np.argmin(history.history['val_loss']))
+    best_val_loss = history.history['val_loss'][best_epoch]
+    best_val_acc = history.history['val_accuracy'][best_epoch]
+    print(f"Best epoch: {best_epoch + 1}, val_loss={best_val_loss:.4f}, val_accuracy={best_val_acc:.4f}")
     return model, history
 
 def train_ml_models(X_train, y_train, save_dir="models"):
@@ -70,3 +76,6 @@ def train_ml_models(X_train, y_train, save_dir="models"):
         joblib.dump(model, os.path.join(save_dir, f"{name}_model.joblib"))
 
     return models
+
+def save_history_to_csv(history, filepath="models/training_history.csv"):
+    pd.DataFrame(history.history).to_csv(filepath, index_label="epoch")

@@ -8,7 +8,7 @@ import os
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 from utils.feature_extractor import extract_wav2vec2_features
 from utils.data_loader import load_audio_files, prepare_data
-from utils.model_builder import train_ml_models, train_cnn_model
+from utils.model_builder import train_ml_models, train_cnn_model, save_history_to_csv
 from utils.model_trainer import ensemble_predict
 from utils.helper import evaluate_performance
 from visualizer import visualizer
@@ -47,6 +47,8 @@ def run_pipeline(data_dir):
     input_shape = (24, 32, 1)
     num_classes = len(np.unique(labels))
     cnn_model, history = train_cnn_model(X_train, y_train, X_test, y_test, input_shape, num_classes,"models")
+    visualizer.plot_training_history(history, "plots/cnn_history_v2.png")
+    save_history_to_csv(history)
     with open('config/weights.json', 'r') as f:
         weights = json.load(f)['weights']
     
