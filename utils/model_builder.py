@@ -54,6 +54,8 @@ def train_cnn_model(X_train, y_train, X_val, y_val, input_shape, num_classes, sa
     model.save_weights(os.path.join("models", "cnn_model_weights.keras"))
     model.save("models/cnn_model.h5")
     model.save("models/cnn_model.keras")
+    if not os.path.exists("plots"):
+        os.makedirs("plots")
     plot_model(model,to_file="plots/cnn_model_architecture.png", show_layer_names=True,expand_nested=True,dpi=100)
 
     best_epoch = int(np.argmin(history.history['val_loss']))
@@ -63,7 +65,8 @@ def train_cnn_model(X_train, y_train, X_val, y_val, input_shape, num_classes, sa
     return model, history
 
 def train_ml_models(X_train, y_train, save_dir="models"):
-    os.makedirs(save_dir, exist_ok=True)
+    if not os.path.exists(save_dir):
+        os.makedirs(save_dir, exist_ok=True)
     
     models = {
         'svm': SVC(probability=True),
@@ -78,4 +81,6 @@ def train_ml_models(X_train, y_train, save_dir="models"):
     return models
 
 def save_history_to_csv(history, filepath="models/training_history.csv"):
+    if not os.path.exists(os.path.dirname(filepath)):
+        os.makedirs(os.path.dirname(filepath), exist_ok=True)
     pd.DataFrame(history.history).to_csv(filepath, index_label="epoch")
