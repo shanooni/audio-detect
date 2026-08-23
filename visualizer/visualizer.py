@@ -1,5 +1,6 @@
 import matplotlib.pyplot as plt
 import seaborn as sns
+from sklearn.metrics import confusion_matrix
 import os
 
 def plot_metrics(metrics_dict, save_path="metrics_plot.png"):
@@ -50,3 +51,20 @@ def plot_training_history(history, save_path="plots/training_history.png"):
     plt.tight_layout()
     plt.savefig(save_path, dpi=100)
     plt.close()
+    
+def plot_confusion_matrices(models, X_val, y_val, class_names, save_dir="plots"):
+    for name, model in models.items():
+        preds = model.predict(X_val)
+        cm = confusion_matrix(y_val, preds)
+
+        plt.figure(figsize=(6, 5))
+        sns.heatmap(cm, annot=True, fmt="d", cmap="Blues",
+                    xticklabels=class_names, yticklabels=class_names)
+        plt.title(f"Confusion Matrix: {name}")
+        plt.xlabel("Predicted")
+        plt.ylabel("Actual")
+        plt.tight_layout()
+        if not os.path.exists(save_dir):
+            os.makedirs(save_dir, exist_ok=True)
+        plt.savefig(f"{save_dir}/{name}_confusion_matrix.png", dpi=100)
+        plt.close()

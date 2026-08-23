@@ -10,7 +10,11 @@ from sklearn.tree import DecisionTreeClassifier
 from sklearn.svm import SVC
 import joblib
 import os
-
+from sklearn.metrics import (
+    accuracy_score, precision_score, recall_score, f1_score,
+    classification_report, confusion_matrix, roc_curve, auc,
+    roc_auc_score
+)
 
 def create_cnn_model(input_shape, num_classes):
     print(f"input shape : {input_shape}")
@@ -84,3 +88,38 @@ def save_history_to_csv(history, filepath="models/training_history.csv"):
     if not os.path.exists(os.path.dirname(filepath)):
         os.makedirs(os.path.dirname(filepath), exist_ok=True)
     pd.DataFrame(history.history).to_csv(filepath, index_label="epoch")
+
+
+def evaluate_models(models, X_val, y_val, save_path="models/comparison_metrics.csv"):
+    rows = []
+    for name, model in models.items():
+        preds = model.predict(X_val)
+        probs = model.predict_proba(X_val) 
+
+        row = {
+            "model": name,
+            "accuracy": accuracy_score(y_val, preds),
+            "precision_macro": precision_score(y_val, preds, average="macro"),
+            "recall_macro": recall_score(y_val, preds, average="macro"),
+            "f1_macro": f1_score(y_val, preds, average="macro"),
+        }
+
+        # ROC-AUC needs special handling for multiclass vs binary
+        if len(np.unique(y_val)) == 2:
+            row["roc_auc"] = roc_auc_score(y_val, probs[:, 1])
+        else:
+            row["roc_auc_ovr"] = roc_auc_score(y_val, probs, multi_class="ovr", average="macro")
+
+        rows.append(row)
+
+    df = pd.DataFrame(rows).sort_values("f1_macro", ascending=False)
+    if not os.path.exists(os.path.dirname(save_path)):
+        os.makedirs(os.path.dirname(save_path), exist_ok=True)
+    df.to_csv(save_path, index=False)
+    return df
+
+def per_class_report(models, X_val, y_val, save_dir="models"):
+    for name, model in models.items():
+        preds = model.predict(X_val)
+        report = classification_report(y_val, preds, output_dict=True)
+        pd.DataFrame(report).transpose().to_csv(f"{save_dir}/{name}_classification_report.csv", index=False)
