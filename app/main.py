@@ -8,7 +8,7 @@ import os
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 from utils.feature_extractor import extract_wav2vec2_features
 from utils.data_loader import load_audio_files, prepare_data
-from utils.model_builder import train_ml_models, train_cnn_model, save_history_to_csv
+from utils.model_builder import train_ml_models, train_cnn_model, save_history_to_csv, evaluate_models, per_class_report
 from utils.model_trainer import ensemble_predict
 from utils.helper import evaluate_performance
 from visualizer import visualizer
@@ -35,7 +35,9 @@ def run_pipeline(data_dir):
     X_train_flat = X_train.reshape(X_train.shape[0], -1)
     X_test_flat = X_test.reshape(X_test.shape[0], -1)
     ml_models = train_ml_models(X_train_flat, y_train)
-
+    evaluate_models(ml_models, X_test_flat, y_test)
+    per_class_report(ml_models, X_test_flat, y_test)
+    visualizer.plot_confusion_matrices(ml_models, X_test_flat, y_test, class_names=['real', 'fake'], save_dir="/Users/shanoonissaka/Document/master-thesis/audio-detect/plots/ml_confusion_matrices")
     # CNN
     # Reshape the feature vectors for CNN input
     # try:
@@ -47,9 +49,9 @@ def run_pipeline(data_dir):
     input_shape = (24, 32, 1)
     num_classes = len(np.unique(labels))
     cnn_model, history = train_cnn_model(X_train, y_train, X_test, y_test, input_shape, num_classes,"models")
-    visualizer.plot_training_history(history, "plots/cnn_history_v2.png")
+    visualizer.plot_training_history(history, "/Users/shanoonissaka/Document/master-thesis/audio-detect/plots/cnn_history_v2.png")
     save_history_to_csv(history)
-    with open('config/weights.json', 'r') as f:
+    with open('/Users/shanoonissaka/Document/master-thesis/audio-detect/config/weights.json', 'r') as f:
         weights = json.load(f)['weights']
     
     # Ensemble predictions
@@ -57,9 +59,9 @@ def run_pipeline(data_dir):
     ensemble_preds = ensemble_predict(X_test_flat, X_test, ml_models, cnn_model, weights)
 
     metrics = evaluate_performance(y_test, ensemble_preds)
-    visualizer.plot_metrics(metrics, save_path="plots/metrics_plot-v2.png")
+    visualizer.plot_metrics(metrics, save_path="/Users/shanoonissaka/Document/master-thesis/audio-detect/plots/metrics_plot-v2.png")
     class_names = ['real', 'fake']
-    visualizer.plot_confusion_matrix(metrics["confusion_matrix"], class_labels=class_names, save_path="plots/conf_matrix-v2.png")
+    visualizer.plot_confusion_matrix(metrics["confusion_matrix"], class_labels=class_names, save_path="/Users/shanoonissaka/Document/master-thesis/audio-detect/plots/conf_matrix-v2.png")
 
 
 # ---- Run ----
