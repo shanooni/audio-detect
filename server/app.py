@@ -20,13 +20,19 @@ def health_check():
 async def predict_audio(file: UploadFile = File(...)):
     try:
         temp_dir = "temp"
+        if os.path.exists(temp_dir):
+            shutil.rmtree(temp_dir)
         os.makedirs(temp_dir, exist_ok=True)
         file_path = os.path.join(temp_dir, file.filename)
+        
+        print(f"file_path: {file_path} received for prediction.")
 
         with open(file_path, "wb") as buffer:
             shutil.copyfileobj(file.file, buffer)
-
+            
+        print(f"File saved to {file_path}. Starting prediction...")
         prediction = predict_audio_deepfake(file_path)
+        print(f"Prediction completed: {prediction}")
         if prediction is not None:
             return JSONResponse(content={"prediction": prediction})
         else:

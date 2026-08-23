@@ -11,10 +11,11 @@ processor = Wav2Vec2Processor.from_pretrained("facebook/wav2vec2-base")
 wav2vec_model = Wav2Vec2Model.from_pretrained("facebook/wav2vec2-base").to(device)
 
 # Load ensemble model components
-svm_model = joblib.load("models/svm_model.joblib")
-dt_model = joblib.load("models/dt_model.joblib")
-rf_model = joblib.load("models/rf_model.joblib")
-cnn_model = load_model("models/cnn_model.h5")
+MODELS_DIR = "/Users/shanoonissaka/Document/master-thesis/audio-detect/app/models"
+svm_model = joblib.load(f"{MODELS_DIR}/svm_model.joblib")
+dt_model = joblib.load(f"{MODELS_DIR}/dt_model.joblib")
+rf_model = joblib.load(f"{MODELS_DIR}/rf_model.joblib")
+cnn_model = load_model(f"{MODELS_DIR}/cnn_model.h5")
 
 def extract_features(file_path):
     try:
